@@ -1252,7 +1252,6 @@ export type BedrockCatalogTest = {
   inference_profile_id?: string | null
   model_id?: string | null
   use_converse?: boolean
-  workspace_id?: string | null
 }
 
 /**

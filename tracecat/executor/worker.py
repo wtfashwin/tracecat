@@ -45,7 +45,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 
 from temporalio import workflow
-from temporalio.worker import Worker
+from temporalio.worker import Interceptor, Worker
 from temporalio.worker.workflow_sandbox import (
     SandboxedWorkflowRunner,
     SandboxRestrictions,
@@ -56,12 +56,14 @@ with workflow.unsafe.imports_passed_through():
 
     from tracecat import config
     from tracecat.dsl.client import get_temporal_client
+    from tracecat.dsl.interceptor import SentryInterceptor
     from tracecat.executor.activities import ExecutorActivities
     from tracecat.executor.backends import (
         initialize_executor_backend,
         shutdown_executor_backend,
     )
     from tracecat.logger import logger
+    from tracecat.observability.sentry import init_sentry
     from tracecat.registry.sync.workflow import (
         RegistrySyncActivities,
         RegistrySyncWorkflow,
@@ -124,6 +126,9 @@ async def main() -> None:
 
     try:
         client = await get_temporal_client()
+        interceptors: list[Interceptor] = []
+        if init_sentry("executor"):
+            interceptors.append(SentryInterceptor())
 
         # Collect all activities from executor and registry sync
         activities = [
@@ -151,6 +156,7 @@ async def main() -> None:
                 task_queue=task_queue,
                 workflows=workflows,
                 activities=activities,
+                interceptors=interceptors,
                 activity_executor=executor,
                 max_concurrent_activities=max_concurrent,
                 workflow_runner=new_sandbox_runner(),

@@ -1,0 +1,56 @@
+type: action
+definition:
+  title: AI Slackbot
+  description: Agentic AI Slackbot with tool calling capabilities.
+  display_group: AI
+  doc_url: https://docs.slack.dev/reference/events/app_mention/
+  namespace: ai
+  name: slackbot
+  expects:
+    event:
+      type: dict[str, Any] | None
+      description: Slack app mention event or interaction payload passed in via Tracecat webhook TRIGGER. If null, the agent will send a message to the channel.
+      default: null
+    prompt:
+      type: str
+      description: Initial prompt for the agent. Used when no event is provided.
+    instructions:
+      type: str
+      description: Instructions for the agent across proactive, app mention, and interaction flows.
+    channel_id:
+      type: str
+      description: Channel ID to send the initial message to.
+    actions:
+      type: list[str] | None
+      description: Additional actions to include in the agent on top of the default Slack actions.
+      default: null
+  steps:
+    - ref: run_agent
+      action: ai.agent
+      args:
+        user_prompt: >-
+          ${{ inputs.event != null && FN.serialize_json(inputs.event) || inputs.prompt }}
+        instructions: >-
+          ${{ inputs.instructions }}
+
+          You are operating in Slack channel <ChannelID>${{ inputs.channel_id }}</ChannelID>.
+          When posting messages, always set `channel` to `${{ inputs.channel_id }}`.
+        actions: >-
+          ${{
+            FN.concat(
+              [
+                "tools.slack.post_message",
+                "tools.slack.list_messages",
+                "tools.slack.list_replies",
+                "tools.slack.list_channels",
+                "tools.slack.list_members",
+                "tools.slack.lookup_user_by_email",
+                "tools.slack.get_profile",
+                "tools.slack.add_reaction",
+                "tools.slack.update_message",
+                "tools.slack_sdk.post_response",
+              ],
+              inputs.actions || []
+            )
+          }}
+  returns: ${{ steps.run_agent.result.output }}

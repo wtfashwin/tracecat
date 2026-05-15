@@ -221,8 +221,7 @@ LEGACY_MODEL_FIELD_SCHEMA_EXTRA: dict[str, Any] = {
     default_title="AI agent",
     description="AI agent with tool calling capabilities. Returns the output and full message history.",
     display_group="AI",
-    doc_url="https://ai.pydantic.dev/agents/",
-    secrets=[*PYDANTIC_AI_REGISTRY_SECRETS],
+    doc_url="https://code.claude.com/docs/en/agent-sdk/overview",
     namespace="ai",
 )
 async def agent(
@@ -304,7 +303,6 @@ async def agent(
     default_title="Run agent preset",
     description="Run an AI agent using a saved agent preset.",
     display_group="AI",
-    secrets=[*PYDANTIC_AI_REGISTRY_SECRETS],
     namespace="ai",
     required_entitlements=["agent_addons"],
 )
@@ -355,9 +353,8 @@ async def preset_agent(
     default_title="AI action",
     description="Call an LLM with a given prompt and model.",
     display_group="AI",
-    doc_url="https://ai.pydantic.dev/agents/",
+    doc_url="https://code.claude.com/docs/en/agent-sdk/overview",
     namespace="ai",
-    secrets=[*PYDANTIC_AI_REGISTRY_SECRETS],
 )
 async def action(
     user_prompt: Annotated[

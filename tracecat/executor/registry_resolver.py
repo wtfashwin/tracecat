@@ -56,6 +56,7 @@ def _build_impl_index(
                 module=impl.module,
                 name=impl.name,
                 origin=origin,
+                deprecated=manifest_action.deprecated,
             )
         elif impl.type == "template":
             index[action_name] = ActionImplementation(
@@ -65,6 +66,7 @@ def _build_impl_index(
                     mode="json"
                 ),
                 origin=origin,
+                deprecated=manifest_action.deprecated,
             )
         else:
             raise ValueError(f"Unknown implementation type: {impl}")
